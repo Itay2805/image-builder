@@ -4,10 +4,14 @@ A tool to create images based on a json file.
 *This tool was made based on https://github.com/no92/vineyard/blob/dev/util/builder*
 
 ## Requirements
+* dd 
 * parted 
+* python3
+    * pyyaml 
 
 ### Optional
 * mkfs.fat (for `fat12/16/32`)
+* mtools (for `fat12/16/32`)
 
 ## How to use
 
