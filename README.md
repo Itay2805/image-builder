@@ -1,5 +1,5 @@
 # image-builder
-A tool to create images based on a yaml file.
+A tool to create images based on a json file.
 
 *This tool was made based on https://github.com/no92/vineyard/blob/dev/util/builder*
 
@@ -13,7 +13,9 @@ A tool to create images based on a yaml file.
 
 You use simply run `image-builder.py <config>` with config being the yaml configuration file
 
-## YAML Layout
+## JSON Layout
+
+See [example.json](example.json) for how such a file would look like
 
 * file - the output filename
 * size - the total size of the image as `<num>M/G` (`1024M` == `1G`)

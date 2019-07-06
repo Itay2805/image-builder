@@ -1,0 +1,9 @@
+file: 'image.img'
+size: 36M
+type: gpt
+partitions:
+- fs: fat32
+  size: fit
+  bootable: true
+  content: 'stuff'
+  label: boot
