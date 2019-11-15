@@ -10,15 +10,14 @@ A tool to create images based on a yaml file.
     * pyyaml 
 
 ### Optional
+* qemu-img (for `vdi`/`vmdk` files)
 * mkfs.fat (for `fat12/16/32`)
 * mtools (for `fat12/16/32`)
-* qemu-img (for `vdi`/`vmdk` files)
+* [echfs-utils](https://github.com/qword-os/echfs) (for `echfs`)
 
 ## How to use
 
 You use simply run `image-builder.py <config>` with config being the yaml configuration file.
-
-If you want to use echfs make sure to clone the `echfs` submodule and run `make echfs-utils`.
 
 If the filename ends with `.vmdk` or `.vdi` then the tool will automatically convert the file into these formats.
 
