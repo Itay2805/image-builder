@@ -1,3 +1,0 @@
-[submodule "echfs"]
-	path = echfs
-	url = git@github.com:qword-os/echfs.git

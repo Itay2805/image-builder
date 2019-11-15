@@ -43,16 +43,14 @@ def create_fat(size):
 
     return create
 
-ECHFS_UTILS = "./echfs/echfs-utils"
-
 def create_echfs(parition):
-    command(f'{ECHFS_UTILS} part{parition["num"]}.img format 512')
+    command(f'echfs-utils part{parition["num"]}.img format 512')
     if parition['content'] is not None:
         for subdir, dirs, files in os.walk(parition['content']):
             for d in dirs:
-                command(f'{ECHFS_UTILS} part{parition["num"]}.img mkdir {os.path.join(subdir, d)[len(parition["content"]):]}')
+                command(f'echfs-utils part{parition["num"]}.img mkdir {os.path.join(subdir, d)[len(parition["content"]):]}')
             for f in files:
-                command(f'{ECHFS_UTILS} part{parition["num"]}.img import {os.path.join(os.path.abspath(subdir), f)} {os.path.join(subdir, f)[len(parition["content"]):]}')
+                command(f'echfs-utils part{parition["num"]}.img import {os.path.join(os.path.abspath(subdir), f)} {os.path.join(subdir, f)[len(parition["content"]):]}')
 
 
 image_fs = {
