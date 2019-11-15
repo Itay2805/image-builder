@@ -4,6 +4,7 @@ import sys
 import re
 import yaml
 
+
 #################################
 # Util
 #################################
@@ -16,19 +17,23 @@ def command(cmd):
 # Partition
 #################################
 
+
 def create_using_parted(t):
     def create(config):
         command(f"parted {config['file']} -s -a minimal mktable {t}")
     return create
+
 
 image_parition = {
     'gpt': create_using_parted('gpt'),
     'mbr': create_using_parted('mbr'),
 }
 
+
 #################################
 # FS
 #################################
+
 
 def create_fat(size):
     def create(parition):
@@ -69,6 +74,7 @@ size_shift = {
     'G': 21,
 }
 
+
 def main(args):
     if len(args) <= 1:
         print(f"Usage: {args[0]} <config> [alternative file]")
@@ -99,53 +105,53 @@ def main(args):
         assert config['type'] in image_parition, f"Unsupported partition type {config['type']}, supported: {image_parition.keys()} :("
         image_parition[config['type']](config)
 
-        parition_start = 2048
+        partition_start = 2048
         partitions = []
 
         assert 'partitions' in config, "No partitions in config :("
-        for parition in config['partitions']:
-            assert 'fs' in parition, f"No filesystem given for partition in part {num} :("
-            assert parition['fs'] in image_fs, f"Invalid filesystem type {parition['fs']}, supported {image_fs.keys()} :("
-            assert 'size' in parition, f"No size given for partition in part {num} :("
-            fs = parition['fs']
-            label = parition['label']
+        for partition in config['partitions']:
+            assert 'fs' in partition, f"No filesystem given for partition in part {num} :("
+            assert partition['fs'] in image_fs, f"Invalid filesystem type {partition['fs']}, supported {image_fs.keys()} :("
+            assert 'size' in partition, f"No size given for partition in part {num} :("
+            fs = partition['fs']
+            label = partition['label']
             num = len(partitions)
 
             # Calculate size
-            if parition['size'] == 'fit':
-                sectors = disk_sectors - parition_start - 2048 + 1
+            if partition['size'] == 'fit':
+                sectors = disk_sectors - partition_start - 2048 + 1
             else:
-                part_size_unit = parition['size'][-1]
-                part_size_num = int(parition['size'][:-1])
+                part_size_unit = partition['size'][-1]
+                part_size_num = int(partition['size'][:-1])
                 assert part_size_unit in size_shift, f"Invalid size unit {size_unit} in part {num} :("
                 sectors = part_size_num << size_shift[size_unit]
 
             partitions.append({
                 'num': num,
-                'start': parition_start,
-                'end': parition_start + sectors,
+                'start': partition_start,
+                'end': partition_start + sectors,
                 'size': sectors,
-                'fs': parition['fs'],
-                'bootable': parition['bootable'] if 'bootable' in parition else False,
-                'content': parition['content'] if 'content' in parition else None,
-                'label': parition['label'] if 'label' in parition else None,
+                'fs': partition['fs'],
+                'bootable': partition['bootable'] if 'bootable' in partition else False,
+                'content': partition['content'] if 'content' in partition else None,
+                'label': partition['label'] if 'label' in partition else None,
             })
             
             if fs in ['echfs']:
-                command(f'parted {ofile} -s -a minimal mkpart {label} {parition_start}s {parition_start + sectors - 1}s')
+                command(f'parted {ofile} -s -a minimal mkpart {label} {partition_start}s {partition_start + sectors - 1}s')
             else:
-                command(f"parted {ofile} -s -a minimal mkpart {label} {fs} {parition_start}s {parition_start + sectors - 1}s")
+                command(f"parted {ofile} -s -a minimal mkpart {label} {fs} {partition_start}s {partition_start + sectors - 1}s")
 
-            if 'bootable' in parition and parition['bootable']:
+            if 'bootable' in partition and partition['bootable']:
                 command(f"parted {ofile} -s -a minimal toggle {num + 1} boot")
             
-            parition_start += sectors
+            partition_start += sectors
 
-        for parition in partitions:
-            command(f"dd if=/dev/zero of=part{parition['num']}.img bs=512 count={parition['size']}")
-            image_fs[parition['fs']](parition)
-            command(f'dd if=part{parition["num"]}.img of={ofile} bs=512 seek={parition["start"]} count={parition["size"]} conv=notrunc')
-            os.unlink(f'part{parition["num"]}.img')
+        for partition in partitions:
+            command(f"dd if=/dev/zero of=part{partition['num']}.img bs=512 count={partition['size']}")
+            image_fs[partition['fs']](partition)
+            command(f'dd if=part{partition["num"]}.img of={ofile} bs=512 seek={partition["start"]} count={partition["size"]} conv=notrunc')
+            os.unlink(f'part{partition["num"]}.img')
 
         if config['file'].endswith('.vmdk'):
             command(f'qemu-img convert -f raw -O vmdk {config["file"]} {config["file"]}')
