@@ -1,9 +1,13 @@
-file: 'image.img'
-size: 36M
+file: 'image.vdi'
+size: 50M
 type: gpt
 partitions:
 - fs: fat32
-  size: fit
+  size: 10M
   bootable: true
   content: 'stuff'
   label: boot
+- fs: echfs
+  size: fit
+  content: 'other_stuff'
+  label: mainfs

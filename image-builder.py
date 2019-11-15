@@ -43,10 +43,23 @@ def create_fat(size):
 
     return create
 
+ECHFS_UTILS = "./echfs/echfs-utils"
+
+def create_echfs(parition):
+    command(f'{ECHFS_UTILS} part{parition["num"]}.img format 512')
+    if parition['content'] is not None:
+        for subdir, dirs, files in os.walk(parition['content']):
+            for d in dirs:
+                command(f'{ECHFS_UTILS} part{parition["num"]}.img mkdir {os.path.join(subdir, d)[len(parition["content"]):]}')
+            for f in files:
+                command(f'{ECHFS_UTILS} part{parition["num"]}.img import {os.path.join(os.path.abspath(subdir), f)} {os.path.join(subdir, f)[len(parition["content"]):]}')
+
+
 image_fs = {
     'fat12': create_fat(12),
     'fat16': create_fat(16),
     'fat32': create_fat(32),
+    'echfs': create_echfs,
 }
 
 #################################
@@ -60,7 +73,7 @@ size_shift = {
 
 def main(args):
     if len(args) <= 1:
-        print(f"Usage: {args[0]} <config> [<device>]")
+        print(f"Usage: {args[0]} <config> [alternative file]")
     else:
         with open(args[1], 'rb') as f:
             config = yaml.load(f.read(), Loader=yaml.FullLoader)
@@ -119,17 +132,27 @@ def main(args):
                 'content': parition['content'] if 'content' in parition else None,
                 'label': parition['label'] if 'label' in parition else None,
             })
-
-            command(f"parted {ofile} -s -a minimal mkpart {label} {fs} {parition_start}s {parition_start + sectors - 1}s")
+            
+            if fs in ['echfs']:
+                command(f'parted {ofile} -s -a minimal mkpart {label} {parition_start}s {parition_start + sectors - 1}s')
+            else:
+                command(f"parted {ofile} -s -a minimal mkpart {label} {fs} {parition_start}s {parition_start + sectors - 1}s")
 
             if 'bootable' in parition and parition['bootable']:
                 command(f"parted {ofile} -s -a minimal toggle {num + 1} boot")
+            
+            parition_start += sectors
 
         for parition in partitions:
             command(f"dd if=/dev/zero of=part{parition['num']}.img bs=512 count={parition['size']}")
             image_fs[parition['fs']](parition)
             command(f'dd if=part{parition["num"]}.img of={ofile} bs=512 seek={parition["start"]} count={parition["size"]} conv=notrunc')
             os.unlink(f'part{parition["num"]}.img')
+
+        if config['file'].endswith('.vmdk'):
+            command(f'qemu-img convert -f raw -O vmdk {config["file"]} {config["file"]}')
+        elif config['file'].endswith('.vdi'):
+            command(f'qemu-img convert -f raw -O vdi {config["file"]} {config["file"]}')
 
 
 if __name__ == "__main__":
