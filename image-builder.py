@@ -76,6 +76,9 @@ size_shift = {
 
 
 def main(args):
+    # Skip sectors per track check in mtools
+    os.environ["MTOOLS_SKIP_CHECK"] = "1"
+
     if len(args) <= 1:
         print(f"Usage: {args[0]} <config> [alternative file]")
     else:
