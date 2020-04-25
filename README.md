@@ -1,7 +1,15 @@
 # Image Builder
-A tool to create images based on a yaml file.
+A tool to easily create images based on a yaml configuration.
 
-*This tool was made based on https://github.com/no92/vineyard/blob/dev/util/builder*
+## Supported formats
+### Partitions
+* GPT
+* MBR
+
+### File systems
+* Fat12/16/32
+* Ext2/3/4
+* Echfs
 
 ## Requirements
 * dd 
@@ -10,9 +18,14 @@ A tool to create images based on a yaml file.
     * pyyaml 
 
 ### Optional
-* mkfs.fat (for `fat12/16/32`)
-* mtools (for `fat12/16/32`)
-* qemu-img (for `vdi`/`vmdk` files)
+* for `fat12/16/32`
+    * mkfs.fat
+    * mtools
+* for `ext2/3/4`
+    * mke2fs
+    * e2tools
+* for for `vdi`/`vmdk` files
+    * qemu-img
 
 ## How to use
 
@@ -30,7 +43,7 @@ See [example.yaml](example.yaml) for how such a file would look like
 * size - the total size of the image as `<num>M/G` (`1024M` == `1G`)
 * type - the image type (supported: `gpt`, `mbr`)
 * partitions - array of partitions
-  * `fs` - the file system type (supported: `fat12/16/32`, `echfs`)
+  * `fs` - the file system type (supported: `fat12/16/32`, `ext2/3/4`, `echfs`)
   * `size` - the size of the partition (same format as image size), can also define `fit` to take all left space
   * `bootable` - optional, sets the partition as bootable
   * `label` - the partition label
