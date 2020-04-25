@@ -24,14 +24,14 @@ A tool to easily create images based on a yaml configuration.
 * for `ext2/3/4`
     * mke2fs
     * e2tools
+* for eachfs
+    * [echfs-utils](https://github.com/qword-os/echfs)
 * for for `vdi`/`vmdk` files
     * qemu-img
 
 ## How to use
 
 You use simply run `image-builder.py <config>` with config being the yaml configuration file.
-
-If you want to use echfs make sure to clone the `echfs` submodule and run `make echfs-utils`.
 
 If the filename ends with `.vmdk` or `.vdi` then the tool will automatically convert the file into these formats.
 
