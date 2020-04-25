@@ -57,9 +57,6 @@ def create_fat(size):
     return create
 
 
-ECHFS_UTILS = "./echfs/echfs-utils"
-
-
 def create_ext(typ):
     def create(partition):
         c(f'mke2fs -t ext{typ} part{partition["num"]}.img')
@@ -67,7 +64,7 @@ def create_ext(typ):
 
 
 def create_echfs(parition):
-    c(f'{ECHFS_UTILS} part{parition["num"]}.img format 512')
+    c(f'echfs-utils part{parition["num"]}.img format 512')
 
 
 image_fs = {
@@ -103,9 +100,9 @@ def copy_ext(partition):
 def copy_echfs(partition):
     for subdir, dirs, files in os.walk(partition['content']):
         for d in dirs:
-            c(f'{ECHFS_UTILS} part{partition["num"]}.img mkdir {os.path.join(subdir, d)[len(partition["content"]):]}')
+            c(f'echfs-utils part{partition["num"]}.img mkdir {os.path.join(subdir, d)[len(partition["content"]):]}')
         for f in files:
-            c(f'{ECHFS_UTILS} part{partition["num"]}.img import {os.path.join(os.path.abspath(subdir), f)} {os.path.join(subdir, f)[len(partition["content"]):]}')
+            c(f'echfs-utils part{partition["num"]}.img import {os.path.join(os.path.abspath(subdir), f)} {os.path.join(subdir, f)[len(partition["content"]):]}')
 
 
 copy_files = {
